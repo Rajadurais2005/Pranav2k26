@@ -24,6 +24,15 @@ const nonTechnicalEvents: Event[] = [
 
 const EventCard = ({ event, index }: { event: Event; index: number }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    });
+  };
 
   return (
     <>
@@ -33,15 +42,30 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-50px' }}
         transition={{ duration: 0.6, delay: index * 0.1 }}
-        whileHover={{ y: -8, transition: { duration: 0.3 } }}
+        whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.3 } }}
         onClick={() => setIsOpen(true)}
+        onMouseMove={handleMouseMove}
+        style={{
+          transform: `perspective(600px) rotateX(${(mousePos.y - 0.5) * -5}deg) rotateY(${(mousePos.x - 0.5) * 5}deg)`,
+        }}
       >
+        {/* Rune watermark */}
+        <div className="absolute top-2 right-2 text-4xl text-primary/[0.04] font-display select-none pointer-events-none">✦</div>
+
         {/* Gold border glow on hover */}
         <div className="absolute inset-0 rounded-sm border border-primary/0 group-hover:border-primary/40 transition-all duration-500" />
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{ boxShadow: 'inset 0 0 30px hsla(43, 72%, 53%, 0.05)' }}
         />
         
+        {/* Spotlight following cursor */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, hsla(43, 72%, 53%, 0.08), transparent 60%)`,
+          }}
+        />
+
         {/* Shimmer effect */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
           style={{
@@ -69,14 +93,32 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
           animate={{ opacity: 1 }}
           onClick={() => setIsOpen(false)}
         >
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
+          
+          {/* Energy burst on open */}
+          <motion.div
+            className="absolute w-2 h-2 rounded-full bg-primary"
+            initial={{ scale: 0, opacity: 0.6 }}
+            animate={{ scale: [0, 30], opacity: [0.6, 0] }}
+            transition={{ duration: 0.6 }}
+          />
+
           <motion.div
             className="relative glass-dark rounded-sm p-8 max-w-lg w-full glow-gold"
-            initial={{ scale: 0.9, y: 40 }}
-            animate={{ scale: 1, y: 0 }}
+            initial={{ scale: 0.85, y: 60, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
             transition={{ type: 'spring', damping: 25 }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Arcane circle watermark */}
+            <motion.div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] text-primary/[0.03] pointer-events-none select-none"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+            >
+              ⎊
+            </motion.div>
+
             <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-primary transition-colors">
               <X size={20} />
             </button>
@@ -103,13 +145,25 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
             </motion.p>
             <motion.button
               className="px-8 py-3 font-display text-xs tracking-[0.3em] uppercase glass-gold rounded-sm text-primary
-                hover:glow-gold-intense transition-all duration-500"
+                hover:glow-gold-intense transition-all duration-500 relative overflow-hidden"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
             >
+              {/* Pulse aura */}
+              <motion.span
+                className="absolute inset-0 rounded-sm"
+                animate={{
+                  boxShadow: [
+                    '0 0 10px hsla(43, 72%, 53%, 0.1)',
+                    '0 0 20px hsla(43, 72%, 53%, 0.3)',
+                    '0 0 10px hsla(43, 72%, 53%, 0.1)',
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
               Register Soon
             </motion.button>
           </motion.div>
@@ -122,7 +176,6 @@ const EventCard = ({ event, index }: { event: Event; index: number }) => {
 const EventsSection = () => {
   return (
     <section id="events" className="relative py-24 md:py-32 px-4">
-      {/* Section divider */}
       <motion.div
         className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"
         initial={{ scaleX: 0 }}
@@ -132,7 +185,6 @@ const EventsSection = () => {
       />
 
       <div className="max-w-6xl mx-auto">
-        {/* Section title */}
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
@@ -144,7 +196,6 @@ const EventsSection = () => {
           <h2 className="text-4xl md:text-5xl font-display text-gold-gradient tracking-wide">Events</h2>
         </motion.div>
 
-        {/* Technical */}
         <div className="mb-16">
           <motion.h3
             className="font-display text-xl text-primary/80 tracking-[0.3em] uppercase mb-8 text-center"
@@ -159,7 +210,6 @@ const EventsSection = () => {
           </div>
         </div>
 
-        {/* Non-Technical */}
         <div>
           <motion.h3
             className="font-display text-xl text-primary/80 tracking-[0.3em] uppercase mb-8 text-center"

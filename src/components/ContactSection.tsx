@@ -47,15 +47,26 @@ const ContactSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.15 }}
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -6, scale: 1.02 }}
             >
-              {/* Emboss shine */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+              {/* Embossed shine sweep */}
+              <motion.div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{
-                  background: 'linear-gradient(135deg, transparent 30%, hsla(43, 72%, 53%, 0.08) 50%, transparent 70%)',
+                  background: 'linear-gradient(135deg, transparent 20%, hsla(43, 72%, 53%, 0.1) 45%, hsla(43, 72%, 53%, 0.15) 50%, hsla(43, 72%, 53%, 0.1) 55%, transparent 80%)',
+                  backgroundSize: '200% 200%',
                 }}
+                animate={{ backgroundPosition: ['0% 0%', '200% 200%'] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
               />
               <div className="absolute inset-0 rounded-sm border border-primary/0 group-hover:border-primary/30 transition-all duration-500" />
+              {/* Glow shadow on hover */}
+              <motion.div
+                className="absolute inset-0 rounded-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  boxShadow: '0 0 30px hsla(43, 72%, 53%, 0.1), 0 0 60px hsla(43, 72%, 53%, 0.05)',
+                }}
+              />
               
               <contact.icon className="w-8 h-8 text-primary/60 mx-auto mb-4 group-hover:text-primary transition-colors duration-300" />
               <p className="font-display text-sm tracking-wider text-primary mb-2">{contact.label}</p>
